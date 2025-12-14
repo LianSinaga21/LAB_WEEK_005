@@ -3,6 +3,8 @@ package com.example.lab_week_005.api
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
+import com.example.lab_week_005.model.ImageData
+
 
 interface CatApiService {
 
@@ -10,5 +12,5 @@ interface CatApiService {
     fun searchImages(
         @Query("limit") limit: Int,
         @Query("size") format: String
-    ): Call<String>
+    ): Call<List<ImageData>>
 }

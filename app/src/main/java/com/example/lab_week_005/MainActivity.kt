@@ -5,33 +5,33 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lab_week_005.api.CatApiService
+import com.example.lab_week_005.model.ImageData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MainActivity : AppCompatActivity() {
 
-    // STEP 17
+    // Retrofit (Moshi)
     private val retrofit by lazy {
         Retrofit.Builder()
             .baseUrl("https://api.thecatapi.com/v1/")
-            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
             .build()
     }
 
-    // STEP 19
+    // API Service
     private val catApiService by lazy {
         retrofit.create(CatApiService::class.java)
     }
 
-    // STEP 20
+    // TextView
     private val apiResponseView: TextView by lazy {
         findViewById(R.id.api_response)
     }
 
-    // STEP 21
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,15 +41,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCatImageResponse() {
         val call = catApiService.searchImages(1, "full")
-        call.enqueue(object : Callback<String> {
+        call.enqueue(object : Callback<List<ImageData>> {
 
-            override fun onFailure(call: Call<String>, t: Throwable) {
+            override fun onFailure(call: Call<List<ImageData>>, t: Throwable) {
                 Log.e(MAIN_ACTIVITY, "Failed to get response", t)
             }
 
-            override fun onResponse(call: Call<String>, response: Response<String>) {
+            override fun onResponse(
+                call: Call<List<ImageData>>,
+                response: Response<List<ImageData>>
+            ) {
                 if (response.isSuccessful) {
-                    apiResponseView.text = response.body()
+                    val images = response.body()
+                    val firstImageUrl =
+                        images?.firstOrNull()?.imageUrl ?: "No URL"
+
+                    apiResponseView.text =
+                        getString(R.string.image_placeholder, firstImageUrl)
                 } else {
                     Log.e(
                         MAIN_ACTIVITY,
